@@ -1,0 +1,11 @@
+---
+customer_number: 500
+customer_description: Drew
+pw_template_number: 17
+split_horizon_group: IXR
+vpls_number: 1002
+route_distinguisher: 65535:800001002
+route_target_import: target:65535:800001002
+bgp_ad_vpls_id: 65535:800001002
+sap_interface: 1/1/2:*
+sap_ingress_qos: 555

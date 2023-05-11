@@ -1,0 +1,40 @@
+Chassis Info
+---
+Chassis {{ chassis_state['chassis-number'] }}:
+  - class: {{ chassis_state['chassis-class'] }}
+  - role: {{ chassis_state['role'] }}
+  Flash Info:
+{% for row in flash_state %}
+{% if row['oper-state'] == 'ok' %}
+    - cf{{ row['flash-id'] }}: {{ row['percent-used'] }}%
+{% endif -%} 
+{% endfor %}
+  MDA (Media Dependent Adapter) Info:
+{% for row in card_state['mda'] %}
+{% if row == 'hardware-data' %}
+    MDA Slot  {{ card_state['mda']['mda-slot'] }}
+      - Oper Status: {{ card_state['mda'][row]['oper-state'] }}
+      - Card Type: {{ card_state['mda']['equipped-type'] }}
+      - Total Ports: {{ card_state['mda']['equipped-ports'] }}
+      - Total SAP Instances: {{ card_state['mda']['resource-usage']['sap-instances']['allocated'] }} / {{ card_state['mda']['resource-usage']['sap-instances']['total'] }}
+{% endif %}
+{% endfor %}
+  Fan Info:
+    - Fan trays: {{ chassis_state['fan-trays'] }}
+{% for key in chassis_state %}
+{% if key == 'fan' %}
+    Fan Slot {{ chassis_state[key]['fan-slot'] }}:
+      - Oper Status: {{ chassis_state[key]['hardware-data']['oper-state'] }}
+      - Speed: {{ chassis_state[key]['speed'] }}
+{% endif %}
+{% endfor %}
+  Power Supply Info:
+    - Power Supplies: {{ chassis_state['power-supplies'] }}
+{% for key in chassis_state %}
+{% if loop.index0 < chassis_state['power-supplies'] | int %}
+    Power Supply {{ chassis_state['power-supply'][loop.index0]['hardware-data']['serial-number'] }}:
+      - Type: {{ chassis_state['power-supply'][loop.index0]['equipped-type'] }}
+      - Oper Status: {{ chassis_state['power-supply'][loop.index0]['hardware-data']['oper-state'] }}
+      - Temp Status: {{ chassis_state['power-supply'][loop.index0]['temp-status'] }}
+{% endif %}
+{% endfor %}

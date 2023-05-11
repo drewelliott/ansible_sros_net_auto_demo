@@ -1,0 +1,41 @@
+---
+- hosts: clab-lumen-topo2-A503
+  vars:
+    - ansible_network_os: nokia.sros.classic
+  connection: netconf
+  gather_facts: No
+
+  collections:
+  - nokia.sros
+
+  tasks:
+  - name: get state
+    netconf_get:
+      filter: <state xmlns="urn:nokia.com:sros:ns:yang:sr:state"><cpm><flash/></cpm></state>
+      display: json
+    register: result
+
+  - name: save result
+    set_fact:
+      my_var: "{{ result.output.data.state.cpm.flash }}"
+
+  - set_fact:
+      Percent_Used: "{{ my_var|
+                        map('dict2items')|list|flatten|
+                        json_query('[?key==`percent-used`].value')|flatten }}"
+      Flash_ID: "{{ my_var|
+                        map('dict2items')|list|flatten|
+                        json_query('[?key==`flash-id`].value')|flatten }}"
+      Capacity: "{{ my_var|
+                        map('dict2items')|list|flatten|
+                        json_query('[?key==`capacity`].value')|flatten }}"
+
+  - name: display drew stuff
+    debug:
+      msg: "Flash Drive: cf{{ Flash_ID[1] }}: is at {{ Percent_Used[0] }}%"
+
+  - name: print var
+    debug:
+      var: my_var    
+        
+...

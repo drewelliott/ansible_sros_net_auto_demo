@@ -1,0 +1,50 @@
+---
+- hosts: clab-lumen-topo2-A503
+  vars:
+    - ansible_network_os: nokia.sros.classic
+  connection: network_cli
+  gather_facts: No
+
+  collections:
+  - nokia.sros
+
+  tasks:
+  - name: do some config
+    cli_config:
+      config: |
+        configure service customer {{ customer_number }} name "{{ customer_number }}" create
+            description "{{ customer_description }}"
+        exit all
+        configure service pw-template {{ pw_template_number }} name "{{ pw_template_number }}" create
+            split-horizon-group "{{ split_horizon_group }}"
+            exit
+        exit all
+        configure service vpls {{ vpls_number }} name "{{ vpls_number }}" customer {{ customer_number }} create
+            shutdown
+            bgp
+                route-distinguisher {{ route_distinguisher }}
+                route-target import {{ route_target_import }}
+                pw-template-binding {{ pw_template_number }}
+                exit
+            exit
+            bgp-ad
+                shutdown
+                vpls-id {{ bgp_ad_vpls_id }}
+            exit
+            stp
+                shutdown
+            exit
+            sap {{ sap_interface }} create
+                ingress
+                    qos {{ sap_ingress_qos }}
+                exit
+                no shutdown
+            exit all
+
+  - name: backup
+    cli_config:
+      backup: yes
+      backup_options:
+        filename: "{{ inventory_hostname }}.cfg"
+        dir_path: /tmp
+...

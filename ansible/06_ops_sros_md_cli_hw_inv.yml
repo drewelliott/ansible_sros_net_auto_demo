@@ -1,0 +1,39 @@
+---
+- hosts: nokia
+  vars:
+    - ansible_network_os: nokia.sros.md
+  connection: netconf
+  gather_facts: No
+
+  collections:
+  - nokia.sros
+
+  tasks:
+  - name: GET FLASH STATE
+    netconf_get:
+      filter: <state xmlns="urn:nokia.com:sros:ns:yang:sr:state"><cpm><flash/></cpm></state>
+      display: json
+    register: flash_result
+
+  - name: GET CARD STATE
+    netconf_get:
+      filter: <state xmlns="urn:nokia.com:sros:ns:yang:sr:state"><card/></state>
+      display: json
+    register: card_result
+
+
+  - name: GET CHASSIS STATE
+    netconf_get:
+      filter: <state xmlns="urn:nokia.com:sros:ns:yang:sr:state"><chassis/></state>
+      display: json
+    register: chassis_result
+
+  - set_fact:
+      flash_state: "{{ flash_result.output.data.state.cpm.flash }}"
+      card_state: "{{ card_result.output.data.state.card }}"
+      chassis_state: "{{ chassis_result.output.data.state.chassis }}"
+
+  - name: SHOW TEMPLATING RESULTS
+    ansible.builtin.debug:
+      msg: "{{ lookup('ansible.builtin.template', 'templates/check_hw_inv.j2')}}"
+...

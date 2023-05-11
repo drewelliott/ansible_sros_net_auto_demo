@@ -1,0 +1,41 @@
+---
+- hosts: nokia_classic
+  vars:
+    - ansible_network_os: nokia.sros.classic
+  connection: network_cli
+  gather_facts: No
+
+  collections:
+  - nokia.sros
+
+  tasks:
+  - name: get chassis detail
+    cli_command:
+      command: show chassis detail
+    register: chassis_detail
+
+  - local_action: 
+      module: copy 
+      content: "{{ chassis_detail.stdout }}"
+      dest: /home/drelliot/git/lumen_demo/ansible/output/{{ inventory_hostname }}_chassis_detail.txt
+
+  - name: file dir (classic)
+    cli_command:
+      command: file dir
+    register: file_dir
+
+  - local_action: 
+      module: copy 
+      content: "{{ file_dir.stdout }}"
+      dest: /home/drelliot/git/lumen_demo/ansible/output/{{ inventory_hostname }}_file_dir.txt
+
+  - name: get card detail
+    cli_command:
+      command: show card detail
+    register: card_detail
+
+  - local_action: 
+      module: copy 
+      content: "{{ card_detail.stdout }}"
+      dest: /home/drelliot/git/lumen_demo/ansible/output/{{ inventory_hostname }}_card_detail.txt
+...

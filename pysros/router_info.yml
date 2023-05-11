@@ -1,0 +1,11 @@
+---
+username: admin
+password: admin
+port: 830
+gnmi_port: 57400
+insecure: True
+hostkey_verify: False
+routers:
+  sros:
+   clab-lumen-topo2-A201: None
+   clab-lumen-topo2-A202: None

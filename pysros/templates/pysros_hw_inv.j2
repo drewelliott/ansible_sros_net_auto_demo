@@ -1,0 +1,39 @@
+ok: [ {{ vars['router_name'] }}] =>
+Chassis Info
+---
+Chassis {{ vars['chassis']['nokia-state:chassis'][0]['chassis-number'] }}:
+  - class: {{ vars['chassis']['nokia-state:chassis'][0]['chassis-class'] }}
+  - role: {{ vars['chassis']['nokia-state:chassis'][0]['role'] }}
+  Flash Info:
+{%- for row in flash_state %}
+    - cf3: {{ vars['flash']['nokia-state:percent-used'] }}%
+{%- endfor %}
+  MDA (Media Dependent Adapter) Info:
+{%- for row in vars['mda']['nokia-state:mda'][0] %}
+{%- if row == 'hardware-data' %}
+    MDA Slot  {{ vars['mda']['nokia-state:mda'][0]['mda-slot'] }}
+      - Oper Status: {{ vars['mda']['nokia-state:mda'][0][row]['oper-state'] }}
+      - Card Type: {{ vars['mda']['nokia-state:mda'][0]['equipped-type'] }}
+      - Total Ports: {{ vars['mda']['nokia-state:mda'][0]['equipped-ports'] }}
+      - Total SAP Instances: {{ vars['mda']['nokia-state:mda'][0]['resource-usage']['sap-instances']['allocated'] }} / {{ vars['mda']['nokia-state:mda'][0]['resource-usage']['sap-instances']['total'] }}
+{%- endif %}
+{%- endfor %}
+  Fan Info:
+    - Fan trays: {{ vars['chassis']['nokia-state:chassis'][0]['fan-trays'] }}
+{%- for key in vars['chassis']['nokia-state:chassis'][0] %}
+{%- if key == 'fan' %}
+    Fan Slot {{ vars['chassis']['nokia-state:chassis'][0][key][0]['fan-slot'] }}:
+      - Oper Status: {{ vars['chassis']['nokia-state:chassis'][0][key][0]['hardware-data']['oper-state'] }}
+      - Speed: {{ vars['chassis']['nokia-state:chassis'][0][key][0]['speed'] }}
+{%- endif %}
+{%- endfor %}
+  Power Supply Info:
+    - Power Supplies: {{ vars['chassis']['nokia-state:chassis'][0]['power-supplies'] }}
+{%- for key in vars['chassis']['nokia-state:chassis'][0] %}
+{%- if loop.index0 < vars['chassis']['nokia-state:chassis'][0]['power-supplies'] | int %}
+    Power Supply {{ vars['chassis']['nokia-state:chassis'][0]['power-supply'][loop.index0]['hardware-data']['serial-number'] }}:
+      - Type: {{ vars['chassis']['nokia-state:chassis'][0]['power-supply'][loop.index0]['equipped-type'] }}
+      - Oper Status: {{ vars['chassis']['nokia-state:chassis'][0]['power-supply'][loop.index0]['hardware-data']['oper-state'] }}
+      - Temp Status: {{ vars['chassis']['nokia-state:chassis'][0]['power-supply'][loop.index0]['temp-status'] }}
+{%- endif %}
+{%- endfor %}
