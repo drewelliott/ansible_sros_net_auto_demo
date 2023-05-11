@@ -27,7 +27,7 @@ def get_connection(router,
 def get_json(conn_obj, path):
     # converts the native pysros data structure
     # to a json dict for easier parsing
-    payload = conn_obj.running.get(md_path)
+    payload = conn_obj.running.get(path)
     return json.loads(conn_obj.convert(path=path, 
                                        payload=payload, 
                                        source_format='pysros', 
@@ -36,32 +36,45 @@ def get_json(conn_obj, path):
     
 
 def check_flash(conn_obj):
+    # keys are flash-id (cf<flash-id>:)
+    # we also want capacity, free-space, and percent-used
     path = '/nokia-state:state/cpm[cpm-slot="A"]/flash[flash-id=3]'
-    flash_dict = get_json(conn_obj, path)
-
+    fd = get_json(conn_obj, path)
+    d = defaultdict()
+    d['flash'] = fd
+    return d
+    
 
 def check_mda(conn_obj):
+    # keys are mda-slot number
+    # we also want equipped-type and equipped-ports from each slot
     path = '/nokia-state:state/card[slot-number=1]/mda'
-    mda_dict = get_json(conn_obj, path)
+    md = get_json(conn_obj, path)
+    d = defaultdict()
+    d['mda'] = md
+    return d
 
 
 def check_chassis(conn_obj):
+    # 
     path = '/nokia-state:state/chassis'
-    chassis_dict = get_json(conn_obj, path)
+    cd = get_json(conn_obj, path)
+    d = defaultdict()
+    d['chassis'] = cd
+    return d
 
 
 def merge_dicts(list_of_dicts):
-    super_dict = defaultdict(list)
+    super_dict = defaultdict()
     for d in list_of_dicts:
-        for k, v in d.iteritems():
-            super_dict[k].add(v)
+        super_dict.update(d)
     return super_dict
             
             
 def render_output(vars):
     environment = Environment(loader=FileSystemLoader("templates/"))
     template = environment.get_template("pysros_hw_inv.j2")
-    template.render(vars)
+    print(template.render(vars=vars))
 
           
 def main():
